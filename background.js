@@ -21,12 +21,16 @@ async function oauth(endpoint, data) {
   if (!res.ok) throw new Error(`GitHub authorization failed (${res.status}).`);
   return res.json();
 }
+let authGeneration=0;
 async function startLogin() {
   if (!GITHUB_CLIENT_ID) throw new Error('Set GITHUB_CLIENT_ID in config.js, then reload the extension.');
+  const generation=++authGeneration;
   const data = await oauth('device/code',{client_id:GITHUB_CLIENT_ID,scope:'public_repo'});
+  if(generation!==authGeneration) return {};
   if (data.error || !data.device_code) throw new Error(data.error_description || data.error || 'Authorization could not start.');
   const auth = {...data,expiresAt:Date.now()+data.expires_in*1000,nextPoll:Date.now()+data.interval*1000};
   await chrome.storage.local.set({auth});
+  if(generation!==authGeneration) return {};
   await chrome.alarms.create('oauth',{when:auth.nextPoll});
   return {user_code:data.user_code};
 }
@@ -34,15 +38,19 @@ let polling=false;
 async function poll() {
   if(polling) return;
   polling=true;
+  const generation=authGeneration;
   try {
     const {auth} = await chrome.storage.local.get('auth');
-    if(!auth) return;
+    if(!auth || generation!==authGeneration) return;
     if(Date.now()>auth.expiresAt) throw new Error('Authorization expired. Connect again.');
     if(Date.now()<auth.nextPoll) return;
     const data = await oauth('oauth/access_token',{client_id:GITHUB_CLIENT_ID,device_code:auth.device_code,grant_type:'urn:ietf:params:oauth:grant-type:device_code'});
+    if(generation!==authGeneration) return;
     if(data.access_token) {
       await chrome.storage.local.set({token:data.access_token});
+      if(generation!==authGeneration) return;
       await chrome.storage.local.remove(['auth','authError']);
+      if(generation!==authGeneration) return;
       await chrome.alarms.clear('oauth');
       return;
     }
@@ -50,10 +58,14 @@ async function poll() {
     if(data.error==='slow_down') auth.interval+=5;
     auth.nextPoll=Date.now()+Math.max(auth.interval,5)*1000;
     await chrome.storage.local.set({auth});
+    if(generation!==authGeneration) return;
     await chrome.alarms.create('oauth',{when:auth.nextPoll});
   } catch(e) {
+    if(generation!==authGeneration) return;
     await chrome.storage.local.set({authError:e.message});
+    if(generation!==authGeneration) return;
     await chrome.storage.local.remove('auth');
+    if(generation!==authGeneration) return;
     await chrome.alarms.clear('oauth');
   } finally {polling=false;}
 }
@@ -62,7 +74,7 @@ let uploading=false;
 async function handle(msg) {
   if(msg.type==='login') return startLogin();
   if(msg.type==='poll') {await poll();return {};}
-  if(msg.type==='disconnect') {await chrome.storage.local.remove(['token','auth']);await chrome.alarms.clear('oauth');return {};}
+  if(msg.type==='disconnect') {++authGeneration;await chrome.storage.local.remove(['token','auth','authError']);await chrome.alarms.clear('oauth');return {};}
   if(msg.type==='repos') {
     let all=[];
     for(let page=1;;page++) {const rows=await github(`/user/repos?per_page=100&page=${page}&sort=updated`);all.push(...rows.filter(r=>!r.private && r.permissions?.push && !r.archived));if(rows.length<100)break;}
