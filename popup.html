@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>LeetCommit</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+<section id="connect" hidden><button id="login">Connect GitHub</button><div id="authorization" hidden><output id="device-code"></output><button id="open-github">Open GitHub</button><button id="cancel-login">Cancel</button></div></section>
+<main id="editor" hidden>
+<div class="destination"><label>Project<select id="repo"><option value="">Select project</option></select></label><button id="disconnect" title="Disconnect GitHub" aria-label="Disconnect GitHub">↪</button></div>
+<label>Folder<div class="row"><input id="folder" list="folders" placeholder="/" autocomplete="off"><button id="browse" type="button">Browse</button></div><datalist id="folders"></datalist></label>
+<div id="folder-browser" hidden><button id="parent" type="button">↑</button><button id="use-folder" type="button">Use folder</button><div id="folder-list"></div></div>
+<button id="capture">Capture</button>
+<label>Title<input id="title" placeholder="1. Two Sum" autocomplete="off"></label>
+<label>Code<textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea></label>
+<details><summary>Approach</summary><input id="approach" aria-label="Approach" autocomplete="off"></details>
+<details><summary>Commit message</summary><input id="message" aria-label="Commit message" autocomplete="off"></details>
+<details id="manual"><summary>Metadata</summary><div class="metadata"><label>Language<select id="language"></select></label><label>Difficulty<select id="difficulty"><option>Easy</option><option>Medium</option><option>Hard</option></select></label><label>URL<input id="url" type="url"></label></div></details>
+<output id="path"></output><button id="commit">Commit to GitHub</button>
+</main>
+<div id="status" role="status" aria-live="polite" hidden></div>
+<script type="module" src="popup.js"></script></body></html>
