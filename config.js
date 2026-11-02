@@ -1,2 +1,2 @@
 // Register a GitHub OAuth App and enable Device Flow. Client IDs are public.
-export const GITHUB_CLIENT_ID = '';
+export const GITHUB_CLIENT_ID = 'Ov23lisLgDzUYuUGurfP';

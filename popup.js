@@ -2,7 +2,7 @@ import {captureSubmission} from './capture.js';
 import {filePath,header,parseTitle} from './core.js';
 const $=id=>document.getElementById(id);
 const fields=['title','code','approach','message','language','difficulty','url'];
-const languages=['cpp','c','python3','python','java','javascript','typescript','golang','rust','csharp','ruby','swift','kotlin','scala','php','dart','elixir','erlang','r','mysql','postgresql','mssql','oraclesql','bash','racket'];
+const languages=['cpp','c','python3','python','java','javascript','typescript','golang','go','rust','csharp','ruby','swift','kotlin','scala','php','dart','elixir','erlang','r','sql','mysql','postgresql','mssql','oraclesql','bash','racket'];
 for(const language of languages) $('language').add(new Option(language,language));
 let active=false, busy=false, pollTimer, browsePath='', persist=Promise.resolve();
 async function send(type,extra={}) {const result=await chrome.runtime.sendMessage({type,...extra});if(result.error)throw new Error(result.error);return result.data;}
@@ -51,7 +51,7 @@ $('capture').onclick=async()=>{
     $('capture').disabled=true;status('');
     const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
     if(new URL(tab.url).hostname!=='leetcode.com')throw new Error('Open leetcode.com.');
-    const [result]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:captureSubmission});
+    const [result]=await chrome.scripting.executeScript({target:{tabId:tab.id},world:'MAIN',func:captureSubmission});
     const data=result.result;if(!data)throw new Error('Capture failed.');
     const code=header(data.title,data.url,data.difficulty,data.language)+data.code;
     for(const id of ['title','url','difficulty','language'])$(id).value=data[id];
