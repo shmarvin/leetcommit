@@ -18,8 +18,8 @@ The OAuth application must be registered by you before login works. Other users 
 
 ## Use
 
-1. Open a specific submission in LeetCode: a URL containing `/submissions/123456/`.
-2. Click **Capture**. This retrieves that submission's code and metadata, including its language. It does not read later edits in the live editor and does not require an accepted result.
+1. Open a LeetCode problem with its Code tab visible, or open a specific submission (a URL containing `/submissions/123456/`).
+2. Click **Capture**. On a problem page, this reads the current code and language from the live editor, including unsaved edits. On a submission page, it retrieves that submission's code instead. Neither path requires an accepted result.
 3. Review or edit the title and code. The code includes three comment lines: number/title, problem URL, and difficulty.
 4. Optionally expand **Approach** or **Commit message**.
 5. Review the destination and click **Commit to GitHub**.
@@ -46,7 +46,7 @@ C++, C, Python/Python3, Java, JavaScript, TypeScript, Go, Rust, C#, Ruby, Swift,
 
 OAuth requests `public_repo`: it can write public repositories accessible to the account, not only your chosen destination. The application displays only public writable repositories. Disconnect removes its local token; revoke access in GitHub Settings → Applications to invalidate the grant.
 
-Capture makes one on-demand request to LeetCode's internal GraphQL API using your existing LeetCode session. That API can change or reject access. LeetCode's terms prohibit scraping; a manual trigger does not settle whether this capture is permitted. No problem descriptions, examples, or constraints are copied. No data is sent anywhere except LeetCode and GitHub.
+Capture reads the live editor on problem pages and makes one on-demand request to LeetCode's internal GraphQL API using your existing LeetCode session for problem metadata or submission details. That API can change or reject access. LeetCode's terms prohibit scraping; a manual trigger does not settle whether this capture is permitted. No problem descriptions, examples, or constraints are copied. No data is sent anywhere except LeetCode and GitHub.
 
 ## Development
 
@@ -56,4 +56,4 @@ Plain JavaScript ES modules; no compilation or install required. Run tests with 
 npm test
 ```
 
-Tests cover filename normalization, language headers, Unicode encoding, submission capture, creation, unchanged-content skipping, and update conflicts. Live OAuth, LeetCode session capture, and actual GitHub writes require browser testing with your own accounts.
+Tests cover filename normalization, language headers, Unicode encoding, problem-editor and submission capture, creation, unchanged-content skipping, and update conflicts. Live OAuth, LeetCode session capture, and actual GitHub writes require browser testing with your own accounts.
